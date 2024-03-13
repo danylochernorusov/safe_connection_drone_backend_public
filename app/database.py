@@ -73,7 +73,7 @@ class Message(Base):
         self.__recipient_id = recipient_id
 
     def get_json(self):
-        json = {"text":self.__text, "sender_id": self.__sender_id, "recipient_id": self.__recipient_id}
+        json = {"id": self.id, "text": self.__text, "sender_id": self.__sender_id, "recipient_id": self.__recipient_id}
 
         return json
 

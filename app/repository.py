@@ -59,3 +59,4 @@ class MessageRepository:
     def delete(self, id: int) -> None:
         message = session.query(Message).filter_by(id=id).first()
         session.delete(message)
+        session.commit()
