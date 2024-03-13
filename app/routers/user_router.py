@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from auth import get_current_user
+from routers.auth import get_current_user
 from database import User
 from repository import UserRepository
 from typing import Annotated
