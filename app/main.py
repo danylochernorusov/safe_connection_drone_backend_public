@@ -14,8 +14,8 @@ message_repository = MessageRepository()
 jwt_settings = JWTSetings()
 
 def get_current_user(token: Annotated[str, Depends(oauth2_sheme)]):
-    json_user = jwt.decode(token, jwt_settings.public_key, algorithms=[jwt_settings.algorithm])
     try:
+        json_user = jwt.decode(token, jwt_settings.public_key, algorithms=[jwt_settings.algorithm])
         user = user_repository.search(json_user["username"], json_user["password"])
         return user
     except:
