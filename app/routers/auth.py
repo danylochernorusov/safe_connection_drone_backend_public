@@ -12,14 +12,6 @@ user_repository = UserRepository()
 message_repository = MessageRepository()
 jwt_settings = JWTSetings()
 
-def get_current_user(token: Annotated[str, Depends(oauth2_sheme)]):
-    try:
-        json_user = jwt.decode(token, jwt_settings.public_key, algorithms=[jwt_settings.algorithm])
-        user = user_repository.search(json_user["username"], json_user["password"])
-        return user
-    except:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-
 @router.post("/api/v1/login/")
 def login(from_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     try:

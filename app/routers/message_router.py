@@ -1,25 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordBearer
 from database import User
 from repository import UserRepository, MessageRepository
+from get_current_user import get_current_user
 from schemas import SMessage
 from settings import JWTSetings
 from typing import Annotated
-import jwt
 
 router = APIRouter(prefix="/api/v1/message", tags=["Messages"])
 oauth2_sheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 user_repository = UserRepository()
 message_repository = MessageRepository()
 jwt_settings = JWTSetings()
-
-def get_current_user(token: Annotated[str, Depends(oauth2_sheme)]):
-    try:
-        json_user = jwt.decode(token, jwt_settings.public_key, algorithms=[jwt_settings.algorithm])
-        user = user_repository.search(json_user["username"], json_user["password"])
-        return user
-    except:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 @router.post("")
 def send_a_message(current_user: Annotated[User, Depends(get_current_user)], message: SMessage):
