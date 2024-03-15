@@ -3,3 +3,5 @@ fastapi
 sqlalchemy
 python-multipart
 pyjwt[crypto]
+pytest
+httpx

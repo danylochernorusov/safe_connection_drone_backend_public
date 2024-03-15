@@ -19,7 +19,7 @@ def send_a_message(current_user: Annotated[User, Depends(get_current_user)], mes
 
     return True
 
-@router.get("/api/v1/message")
+@router.get("")
 def get_message(current_user: Annotated[User, Depends(get_current_user)]):
     messages = message_repository.get_all()
     current_user_message = []
@@ -29,7 +29,7 @@ def get_message(current_user: Annotated[User, Depends(get_current_user)]):
 
     return current_user_message
 
-@router.delete("/api/v1/message")
+@router.delete("")
 def delete_message(current_user: Annotated[User, Depends(get_current_user)], id: int):
     message = message_repository.get(id)
     if message.get_sender_id() == current_user.id:
