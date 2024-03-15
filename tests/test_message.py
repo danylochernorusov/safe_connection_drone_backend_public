@@ -21,9 +21,12 @@ def sutup_db():
 
     Base.metadata.drop_all(engine)
 
-@pytest.fixture
-def create_message():
+@pytest.fixture(scope="session", autouse=True)
+def create_messages():
     message = {"text": "message", "recipient_id": 2}
+    client.post("/api/v1/message", json=message, headers={"Authorization": f"Bearer {jwt}"})
+
+    message = {"text": "Hello!", "recipient_id": 2}
     client.post("/api/v1/message", json=message, headers={"Authorization": f"Bearer {jwt}"})
 
 def test_send_a_message():
@@ -52,7 +55,7 @@ def test_get_message():
 
     assert response.json() == messages_json
 
-def test_get_message(create_message):
+def test_get_message():
     message = message_repository.get_all()[-1]
 
     client.delete("/api/v1/message", params={"id": message.id}, headers={"Authorization": f"Bearer {jwt}"})
