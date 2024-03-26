@@ -4,17 +4,20 @@ from database import User
 from repository import UserRepository, MessageRepository
 from get_current_user import get_current_user
 from schemas import SMessage
-from settings import JWTSetings
+from settings import JWTSettings
 from typing import Annotated
 
 router = APIRouter(prefix="/api/v1/message", tags=["Messages"])
 oauth2_sheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 user_repository = UserRepository()
 message_repository = MessageRepository()
-jwt_settings = JWTSetings()
+jwt_settings = JWTSettings()
 
 @router.post("")
 def send_a_message(current_user: Annotated[User, Depends(get_current_user)], message: SMessage):
+    recipient = user_repository.get(message.recipient_id)
+    if recipient == None:
+        return {"message": f"user with id - {message.recipient_id} does not exist."}
     message_repository.add(message.text, current_user.id, message.recipient_id)
 
     return True

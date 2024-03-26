@@ -1,7 +1,9 @@
 uvicorn
 fastapi
 sqlalchemy
+psycopg2
 python-multipart
 pyjwt[crypto]
 pytest
+pytest-dotenv
 httpx

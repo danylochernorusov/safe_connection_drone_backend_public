@@ -2,8 +2,10 @@ from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from hashlib import sha256
+from settings import DataBaseSettings
 
 Base  = declarative_base()
+db_settings = DataBaseSettings()
 
 class User(Base):
     __tablename__ = "users"
@@ -77,7 +79,7 @@ class Message(Base):
 
         return json
 
-engine = create_engine("sqlite:///db.sqlite3")
+engine = create_engine(f"postgresql://{db_settings.username}@{db_settings.host}:{db_settings.port}/{db_settings.db_name}")
 Base.metadata.create_all(bind=engine)
 
 Session = sessionmaker(bind=engine)

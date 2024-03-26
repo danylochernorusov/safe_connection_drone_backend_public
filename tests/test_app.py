@@ -1,32 +1,27 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.database import Base, engine
-from app.repository import MessageRepository
+from app.repository import MessageRepository, UserRepository
 import pytest
 
 client = TestClient(app)
 message_repository = MessageRepository()
-
-jwt = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QgdXNlciIsInBhc3N3b3JkIjoicGFzc3dvcmQifQ.IUx9KKZ1Qm_oSD4JtTgsO-Gp34R9biG4iaLeH6D6StZaakt8AkXSjrz5NKHh1Vvx6MzB4YL7L8mAEe2dsdA5PpxfQfp7Fs_yWDmbqlQk_v7xE5uyhIADOW3BktXDh2v-r_sV7JEiPsFqdrZyuKZlcXixb2p2wZUlURTaxrlsJtJ1nV5CLhFRdF6B5tw0iCGZ7hRF5E7yga_3PAk4WkIybZ-L5-einRAm5NBa21O2YluGHOi1VwXT2ZdVsv9d4hyz-ciijV1jf0Hstu1GRV5jk2NWCR00p6Z3axttnixWkG8EaDrKJm-JqJtTDRw9Z4A1bLxSDxi9cNwRL1Ny60tPI8kvxL4"
+user_repository = UserRepository()
+jwt = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3RfdXNlcjEiLCJwYXNzd29yZCI6InBhc3N3b3JkIn0.pc8yd_sVdZn3gR2t4lt5ZrjM-qUQS656NP7VJmRjDrmfAk6ZnjbY-WwSNdughC0O5yutvBITJNdp5CcAdvvF3e78MhxER2aNG7mmh_piKVPqFSt9bW4KQrhIA-Qj-3UWe8x_RYC5ny1ooOZZwieB756qTBCMd0u27uNbCkktv4csSjNX6UahSPRXfIfPLSennmLhDl3prRb5KT7KH_sM1f2JZhFWPv_NDOX4BrQjf37rkoNMLFMKj9fvIED1DP3lUnNzm6bI7FhinWhJaHI9pey1AZOuEAb6ha8RJc9F2to7ZzJayVcfbP80KvaBnsVZ3CzBR_nI2UctQP2tnCFnXXtwHjM"
 
 @pytest.fixture(scope="session", autouse=True)
-def sutup_db():
+def setup_db():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
 
-    client.post("/api/v1/registarion/", json={"username": "test user", "password": "password"})
-    client.post("/api/v1/registarion/", json={"username": "test user 2", "password": "password"})
+    client.post("/api/v1/registarion/", json={"username": "test_user1", "password": "password"})
+    client.post("/api/v1/registarion/", json={"username": "test_user2", "password": "password"})
 
     yield
 
-    Base.metadata.drop_all(engine)
-
-@pytest.fixture(scope="session", autouse=True)
-def create_messages():
+@pytest.fixture()
+def create_message():
     message = {"text": "message", "recipient_id": 2}
-    client.post("/api/v1/message", json=message, headers={"Authorization": f"Bearer {jwt}"})
-
-    message = {"text": "Hello!", "recipient_id": 2}
     client.post("/api/v1/message", json=message, headers={"Authorization": f"Bearer {jwt}"})
 
 def test_send_a_message():
@@ -34,20 +29,20 @@ def test_send_a_message():
     client.post("/api/v1/message", json=message, headers={"Authorization": f"Bearer {jwt}"})
 
     messages = message_repository.get_all()
-    messages_json = [m.get_json() for m in messages]
-    message["sender_id"] = 1
     message["id"] = messages[-1].id
+    message["sender_id"] = messages[-1].get_sender_id()
+
+    messages_json = [m.get_json() for m in messages]
 
     assert message in messages_json
 
-def test_send_a_message_without_auth():
+def test_send_a_message_without_authorization():
     message = {"text": "message", "recipient_id": 2}
     response = client.post("/api/v1/message", json=message)
 
     assert response.json() == {"detail": "Not authenticated"}
-    assert response.status_code == 401
 
-def test_get_message():
+def test_get_message(create_message):
     response = client.get("/api/v1/message", headers={"Authorization": f"Bearer {jwt}"})
 
     messages = message_repository.get_all()
@@ -55,7 +50,7 @@ def test_get_message():
 
     assert response.json() == messages_json
 
-def test_get_message():
+def test_dellete_message(create_message):
     message = message_repository.get_all()[-1]
 
     client.delete("/api/v1/message", params={"id": message.id}, headers={"Authorization": f"Bearer {jwt}"})
@@ -66,6 +61,19 @@ def test_get_message():
 
 def test_delete_message_without_auth():
     response = client.delete("/api/v1/message")
+
+    assert response.json() == {"detail": "Not authenticated"}
+    assert response.status_code == 401
+
+def test_get_users():
+    response = client.get("/api/v1/users", headers={"Authorization": f"Bearer {jwt}"})
+    users = user_repository.get_all()
+    users_json = [user.get_json_without_password() for user in users]
+
+    assert response.json() == users_json
+
+def test_get_users_without_auth():
+    response = client.get("/api/v1/users")
 
     assert response.json() == {"detail": "Not authenticated"}
     assert response.status_code == 401

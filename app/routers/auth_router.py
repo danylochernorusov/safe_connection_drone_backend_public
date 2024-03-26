@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from repository import UserRepository, MessageRepository
-from settings import JWTSetings
+from settings import JWTSettings
 from schemas import SUser
 from typing import Annotated
 import jwt
@@ -10,7 +10,7 @@ router = APIRouter(tags=["Auth"])
 oauth2_sheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 user_repository = UserRepository()
 message_repository = MessageRepository()
-jwt_settings = JWTSetings()
+jwt_settings = JWTSettings()
 
 @router.post("/api/v1/login/")
 def login(from_data: Annotated[OAuth2PasswordRequestForm, Depends()]):

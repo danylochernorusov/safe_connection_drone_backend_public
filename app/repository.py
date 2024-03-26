@@ -46,8 +46,8 @@ class MessageRepository:
         return message
 
     def get_all(self) -> list[User]:
-        message = session.query(Message).all()
-        return message
+        messages = session.query(Message).all()
+        return messages
 
     def update(self, id: int, new_text: str) -> None:
         message = session.query(Message).filter_by(id=id).first()

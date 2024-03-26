@@ -1,13 +1,13 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from repository import UserRepository
-from settings import JWTSetings
+from settings import JWTSettings
 from typing import Annotated
 import jwt
 
 oauth2_sheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 user_repository = UserRepository()
-jwt_settings = JWTSetings()
+jwt_settings = JWTSettings()
 
 def get_current_user(token: Annotated[str, Depends(oauth2_sheme)]):
     try:
