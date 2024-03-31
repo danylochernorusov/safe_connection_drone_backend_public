@@ -79,7 +79,7 @@ class Message(Base):
 
         return json
 
-engine = create_engine(f"postgresql://{db_settings.username}@{db_settings.host}:{db_settings.port}/{db_settings.db_name}")
+engine = create_engine(f"postgresql://{db_settings.username}:{db_settings.password}@{db_settings.host}:{db_settings.port}/{db_settings.db_name}")
 Base.metadata.create_all(bind=engine)
 
 Session = sessionmaker(bind=engine)

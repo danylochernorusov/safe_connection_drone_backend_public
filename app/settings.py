@@ -8,6 +8,7 @@ class JWTSettings(BaseModel):
 
 class DataBaseSettings(BaseModel):
     username: str = os.getenv("DB_USERNAME")
+    password: str = os.getenv("DB_PASSWORD")
     host: str | int = os.getenv("DB_HOST")
     port: int = os.getenv("DB_PORT")
     db_name: str = os.getenv("DB_NAME")
