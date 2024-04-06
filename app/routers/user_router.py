@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from get_current_user import get_current_user
-from database import User
+from sqlalchemy import text
+from database import User, engine
 from repository import UserRepository
 from typing import Annotated
 
@@ -15,3 +16,14 @@ def get_users(current_user: Annotated[User, Depends(get_current_user)]):
         list_users.append(user.get_json_without_password())
 
     return list_users
+
+@router.get("/search")
+def search_user(current_user: Annotated[User, Depends(get_current_user)], username: str):
+    with engine.connect() as connect:
+        response = connect.execute(text(f"SELECT * FROM users WHERE username LIKE '%{username}%'"))
+
+    users = []
+    for user in response:
+        users.append({"id": user[0], "username": user[1]})
+    
+    return users
