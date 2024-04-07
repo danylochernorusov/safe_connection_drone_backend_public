@@ -23,12 +23,16 @@ def send_a_message(current_user: Annotated[User, Depends(get_current_user)], mes
     return True
 
 @router.get("")
-def get_message(current_user: Annotated[User, Depends(get_current_user)]):
+def get_messages(current_user: Annotated[User, Depends(get_current_user)], id_user: int | None = None):
     messages = message_repository.get_all()
     current_user_message = []
     for message in messages:
         if message.get_sender_id() == current_user.id or message.get_recipient_id() == current_user.id:
-            current_user_message.append(message.get_json())
+            if id_user != None:
+                if message.get_sender_id() == id_user or message.get_recipient_id() == id_user:
+                    current_user_message.append(message.get_json())
+            else:
+                current_user_message.append(message.get_json())
 
     return current_user_message
 
