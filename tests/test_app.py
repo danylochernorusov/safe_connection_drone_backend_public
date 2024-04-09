@@ -16,12 +16,16 @@ def setup_db():
 
     client.post("/api/v1/registarion/", json={"username": "test_user1", "password": "password"})
     client.post("/api/v1/registarion/", json={"username": "test_user2", "password": "password"})
+    client.post("/api/v1/registarion/", json={"username": "test_user3", "password": "password"})
 
     yield
 
 @pytest.fixture()
 def create_message():
     message = {"text": "message", "recipient_id": 2}
+    client.post("/api/v1/message", json=message, headers={"Authorization": f"Bearer {jwt}"})
+
+    message = {"text": "message", "recipient_id": 3}
     client.post("/api/v1/message", json=message, headers={"Authorization": f"Bearer {jwt}"})
 
 def test_send_a_message():
@@ -42,15 +46,16 @@ def test_send_a_message_without_authorization():
 
     assert response.json() == {"detail": "Not authenticated"}
 
-def test_get_message(create_message):
-    response = client.get("/api/v1/message", headers={"Authorization": f"Bearer {jwt}"})
+def test_get_messages_from_specific_correspondence(create_message):
+    response = client.get("/api/v1/message?id_user=2", headers={"Authorization": f"Bearer {jwt}"})
 
     messages = message_repository.get_all()
-    messages_json = [message.get_json() for message in messages]
+    all_messages_json = [message.get_json() for message in messages if message.get_sender_id() == 1 or message.get_recipient_id() == 1]
+    messages_from_specific_correspondence_json = [message for message in all_messages_json if message["sender_id"] == 2 or message["recipient_id"] == 2]
 
-    assert response.json() == messages_json
+    assert response.json() == messages_from_specific_correspondence_json
 
-def test_dellete_message(create_message):
+def test_delete_message(create_message):
     message = message_repository.get_all()[-1]
 
     client.delete("/api/v1/message", params={"id": message.id}, headers={"Authorization": f"Bearer {jwt}"})
