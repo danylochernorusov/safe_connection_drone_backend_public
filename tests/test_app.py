@@ -82,3 +82,19 @@ def test_get_users_without_auth():
 
     assert response.json() == {"detail": "Not authenticated"}
     assert response.status_code == 401
+
+def test_delete_users():
+    client.delete("/api/v1/users?password=password", headers={"Authorization": f"Bearer {jwt}"})
+
+    all_users = user_repository.get_all()
+    all_users_json = [user.get_json_without_password() for user in all_users]
+
+    deleted_user = {"id": 1, "username": "test_user1"}
+
+    assert deleted_user not in all_users_json
+
+def test_delete_users_without_auth():
+    response = client.delete("/api/v1/users?password=password")
+
+    assert response.json() == {"detail": "Not authenticated"}
+    assert response.status_code == 401

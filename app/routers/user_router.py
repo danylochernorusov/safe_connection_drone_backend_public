@@ -17,6 +17,16 @@ def get_users(current_user: Annotated[User, Depends(get_current_user)]):
 
     return list_users
 
+@router.delete("")
+def delete_my_account(current_user: Annotated[User, Depends(get_current_user)], password: str):
+    try:
+        user_repository.search(current_user.get_username(), password)
+        user_repository.delete(current_user.id)
+
+        return True
+    except:
+        return False
+
 @router.get("/search")
 def search_user(current_user: Annotated[User, Depends(get_current_user)], username: str):
     with engine.connect() as connect:

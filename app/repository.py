@@ -25,6 +25,7 @@ class UserRepository:
     def delete(self, id: int) -> None:
         user = session.query(User).filter_by(id=id).first()
         session.delete(user)
+        session.commit()
 
     def search(self, username: str, password: str) -> User:
         users = session.query(User).all()
