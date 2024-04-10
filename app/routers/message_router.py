@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from database import User
 from repository import UserRepository, MessageRepository
 from get_current_user import get_current_user
-from schemas import SMessage
+from schemas import SMessage, Response
 from settings import JWTSettings
 from typing import Annotated
 
@@ -13,17 +13,18 @@ user_repository = UserRepository()
 message_repository = MessageRepository()
 jwt_settings = JWTSettings()
 
-@router.post("")
-def send_a_message(current_user: Annotated[User, Depends(get_current_user)], message: SMessage):
+@router.post("", status_code=status.HTTP_201_CREATED)
+def send_a_message(current_user: Annotated[User, Depends(get_current_user)], message: SMessage) -> Response:
     recipient = user_repository.get(message.recipient_id)
     if recipient == None:
         return {"message": f"user with id - {message.recipient_id} does not exist."}
     message_repository.add(message.text, current_user.id, message.recipient_id)
 
-    return True
+    response = Response(response="the message has been sent")
+    return response
 
-@router.get("")
-def get_messages(current_user: Annotated[User, Depends(get_current_user)], id_user: int | None = None):
+@router.get("", status_code=status.HTTP_200_OK)
+def get_messages(current_user: Annotated[User, Depends(get_current_user)], id_user: int | None = None) -> list:
     messages = message_repository.get_all()
     current_user_message = []
     for message in messages:
@@ -36,11 +37,13 @@ def get_messages(current_user: Annotated[User, Depends(get_current_user)], id_us
 
     return current_user_message
 
-@router.delete("")
-def delete_message(current_user: Annotated[User, Depends(get_current_user)], id: int):
+@router.delete("", status_code=status.HTTP_200_OK)
+def delete_message(current_user: Annotated[User, Depends(get_current_user)], id: int) -> Response:
     message = message_repository.get(id)
     if message.get_sender_id() == current_user.id:
         message_repository.delete(id)
-        return {"message": "The message has been deleted."}
+        response = Response(response="The message has been deleted.")
+        return response
     else:
-        return {"message": "You cannot delete this message."}
+        response = Response(response="You cannot delete this message.")
+        return response

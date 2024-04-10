@@ -7,3 +7,6 @@ class SUser(BaseModel):
 class SMessage(BaseModel):
     text: str
     recipient_id: int
+
+class Response(BaseModel):
+    response: str
