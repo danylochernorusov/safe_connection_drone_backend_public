@@ -6,6 +6,7 @@ from get_current_user import get_current_user
 from schemas import SMessage, Response
 from settings import JWTSettings
 from typing import Annotated
+from fastapi_cache.decorator import cache
 
 router = APIRouter(prefix="/api/v1/message", tags=["Messages"])
 oauth2_sheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
@@ -24,6 +25,7 @@ def send_a_message(current_user: Annotated[User, Depends(get_current_user)], mes
     return response
 
 @router.get("", status_code=status.HTTP_200_OK)
+@cache(expire=60)
 def get_messages(current_user: Annotated[User, Depends(get_current_user)], id_user: int | None = None) -> list:
     messages = message_repository.get_all()
     current_user_message = []

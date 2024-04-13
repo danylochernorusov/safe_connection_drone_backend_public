@@ -7,3 +7,5 @@ pyjwt[crypto]
 pytest
 pytest-dotenv
 httpx
+redis
+fastapi-cache2

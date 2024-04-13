@@ -12,3 +12,6 @@ class DataBaseSettings(BaseModel):
     host: str | int = os.getenv("DB_HOST")
     port: int = os.getenv("DB_PORT")
     db_name: str = os.getenv("DB_NAME")
+
+class RedisSetings(BaseModel):
+    host: str = os.getenv("REDIS_HOST")

@@ -3,3 +3,4 @@ __pycache__/
 .setenv.sh
 .testenv.sh
 .vscode
+dump.rdb

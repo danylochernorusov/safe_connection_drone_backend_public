@@ -20,6 +20,11 @@ def setup_db():
 
     yield
 
+@pytest.fixture(scope="session", autouse=True)
+def setup_caching():
+    with TestClient(app) as c:
+        print("caching is configured")
+
 @pytest.fixture()
 def create_message():
     message = {"text": "message", "recipient_id": 2}

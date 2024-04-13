@@ -5,11 +5,13 @@ from database import User, engine
 from repository import UserRepository
 from schemas import Response
 from typing import Annotated
+from fastapi_cache.decorator import cache
 
 router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 user_repository = UserRepository()
 
 @router.get("", status_code=status.HTTP_200_OK)
+@cache(expire=60)
 def get_users(current_user: Annotated[User, Depends(get_current_user)]) -> list:
     users = user_repository.get_all()
     list_users = []
@@ -30,6 +32,7 @@ def delete_my_account(current_user: Annotated[User, Depends(get_current_user)], 
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 @router.get("/search", status_code=status.HTTP_200_OK)
+@cache(expire=60)
 def search_user(current_user: Annotated[User, Depends(get_current_user)], username: str) -> list:
     with engine.connect() as connect:
         response = connect.execute(text(f"SELECT * FROM users WHERE username LIKE '%{username}%'"))
